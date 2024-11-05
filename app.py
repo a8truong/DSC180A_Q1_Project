@@ -1,3 +1,7 @@
+# note: this is just the base code, no alterations have been made yet
+# creates the streamlit app with guardrails ai implemented
+# TBD: exploring other guardrails with this same application
+
 from profanity_check import predict
 import guardrails as gd
 from guardrails.validators import Validator, EventDetail, register_validator
