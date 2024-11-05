@@ -1,5 +1,5 @@
 # note: this is just the base code, no alterations have been made yet
-# creates the streamlit app with guardrails ai implemented
+# creates the streamlit app with guardrails ai implemented (fllowing the tutorial)
 # TBD: exploring other guardrails with this same application
 
 from profanity_check import predict
