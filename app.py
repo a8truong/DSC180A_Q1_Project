@@ -115,19 +115,19 @@ def catch_profanity(output: str):
 
 @block_input(feedback = f_selfharm,
                 threshold = 0.5,
-                return_value = "Sorry, I can't translate that (Self Harm).")
+                return_value = "Sorry, I can't translate that.")
 @block_input(feedback = f_hate,
                 threshold = 0.5,
-                return_value = "Sorry, I can't translate that (Hate Speech).")
+                return_value = "Sorry, I can't translate that.")
 @block_input(feedback = f_violent,
-                threshold = 0.1,
-                return_value = "Sorry, I can't translate that (Violence).")
+                threshold = 0.5,
+                return_value = "Sorry, I can't translate that.")
 @block_input(feedback = f_maliciousness,
                 threshold = 0.5,
-                return_value = "Sorry, I can't translate that (Malicious).")
+                return_value = "Sorry, I can't translate that.")
 @block_input(feedback = f_sexual,
                 threshold = 0.5,
-                return_value = "Sorry, I can't translate that (Sexual Content).")
+                return_value = "Sorry, I can't translate that.")
 def with_guardrails(text):
     g1 = catch_profanity(text)
     g2 = catch_pii(g1)
