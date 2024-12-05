@@ -4,4 +4,4 @@ To run the code, conda create --name <env> --file requirements.txt and create a 
 
 With the conda environment activated, run streamlit run app.py. In the streamlit app, you will be able to enter the prompts used to receive translation with and without guardrails implemented. 
 
-The prompts used for the application will be listed in prompts.txt. 
+The prompts used for the application will be listed in prompts.txt as well as the prompts with the expected output and actual output provided in the csv file.
