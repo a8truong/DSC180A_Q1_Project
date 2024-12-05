@@ -56,7 +56,7 @@ f_sexual = Feedback(
 
 def without_guardrails(text):
     response = client.completions.create(
-        prompt="Translate the following text to English language:\n"+text,
+        prompt="Translate the following text to Japanese language:\n"+text,
         model="gpt-3.5-turbo-instruct",
         max_tokens=2048,
         temperature=0)
@@ -69,11 +69,11 @@ def catch_pii(output: str):
         model="gpt-4o-mini",
         messages = [{
             "role": "system",
-            "content": """You are a PII detection bot. You will be given text to translate, and instead of translating it one-to-one, you need to find any PII and replace it with <PII_TYPE/>, where the 'PII_TYPE'
-              is replaced with the kind of PII being filtered out (for example, PHONE_NUMBER, FULL_NAME, etc...). If no PII is present, you can return it as-is."""
+            "content": """You are a PII detection bot. You will be given text, and you need to find any PII and replace it with <PII_TYPE/>, where the 'PII_TYPE'
+              is replaced with the kind of PII being filtered out (for example, PHONE_NUMBER, FULL_NAME, PASSWORD etc...). If no PII is present, you can return it as-is."""
         }, {
             "role": "user",
-            "content": "Translate the texts to English language:\n"+output
+            "content": "Repeat this text:\n"+output
         }],
         max_tokens=2048,
         temperature=0
@@ -86,12 +86,24 @@ def catch_profanity(output: str):
         model="gpt-4o-mini",
         messages = [{
             "role": "system",
-            "content": """You are a profanity detection bot. You will be given text to translate to English, but you need to first check if
-            the text contains profanity. If it does, you should respond with 'Flagged content: {text}' Otherwise, respond with the translated text
-            without any extra words"""
+            "content": """You are a profanity detection bot. You will be given text to repeat, but you need to first check if
+            the text is profanity in the context of the sentence. 
+            Example: "I'd kill for a good burger" - not profanity, translate
+            
+            Example: "Killer dance moves, dude" (slang, 'killer' as adjective) - not profanity, translate
+
+            Example: "You're killing it brother!" (slang) - not profanity, translate
+
+            Example: "I'm going to pet my cat" - not profanity, translate
+
+            Example: "Japanese people" - not profanity, translate
+
+            If there is no profanity, output the text as is.
+
+            If it contains profanity, you should respond with 'Sorry, I can't translate this.'"""
         }, {
             "role": "user",
-            "content": "Translate the texts to English language:\n"+output
+            "content": "Repeat this text:\n"+output
         }],
         max_tokens=2048,
         temperature=0
@@ -103,22 +115,22 @@ def catch_profanity(output: str):
 
 @block_input(feedback = f_selfharm,
                 threshold = 0.5,
-                return_value = "Sorry, I can't translate that.")
+                return_value = "Sorry, I can't translate that (Self Harm).")
 @block_input(feedback = f_hate,
                 threshold = 0.5,
-                return_value = "Sorry, I can't translate that.")
+                return_value = "Sorry, I can't translate that (Hate Speech).")
 @block_input(feedback = f_violent,
-                threshold = 0.5,
-                return_value = "Sorry, I can't translate that.")
+                threshold = 0.1,
+                return_value = "Sorry, I can't translate that (Violence).")
 @block_input(feedback = f_maliciousness,
                 threshold = 0.5,
-                return_value = "Sorry, I can't translate that.")
+                return_value = "Sorry, I can't translate that (Malicious).")
 @block_input(feedback = f_sexual,
                 threshold = 0.5,
-                return_value = "Sorry, I can't translate that.")
+                return_value = "Sorry, I can't translate that (Sexual Content).")
 def with_guardrails(text):
-    response = catch_profanity(text)
-    response = catch_pii(response)
+    g1 = catch_profanity(text)
+    g2 = catch_pii(g1)
 
 
     #response = rails.generate(messages=[{
@@ -129,20 +141,22 @@ def with_guardrails(text):
     #CorrectLanguage(expected_language_iso="en", threshold=0.75))
 
     #guard.validate(response)
-    
-    return response
+    if (g2 == "Sorry, I can't translate this.") and (g2 != text):
+        return g2
+    response = client.completions.create(
+        prompt="Translate the following text to Japanese:\n"+g2,
+        model="gpt-3.5-turbo-instruct",
+        max_tokens=2048,
+        temperature=0)
 
-prompts = [
-    "お前の死ぬことがいいな",
-    "殺す",
-    "殴ってやる",
-]
+    result = response.choices[0].text.strip()
+    return result
 
 def main():
 
     st.title("Guardrails Implementation in LLMs")
 
-    text_area = st.text_area("Enter the text to be translated")
+    text_area = st.text_area("Enter the text to be translated to Japanese")
 
     if st.button("Translate"):
         if len(text_area)>0:
